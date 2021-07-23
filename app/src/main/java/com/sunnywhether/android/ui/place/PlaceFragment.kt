@@ -1,7 +1,9 @@
 package com.sunnywhether.android.ui.place
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +20,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sunnywhether.android.R
 import com.sunnywhether.android.SunnyWeatherApplication
+import com.sunnywhether.android.logic.dao.PlaceDao
+import com.sunnywhether.android.ui.weather.WeatherActivity
 
 class PlaceFragment:Fragment() {
 
@@ -37,6 +41,19 @@ class PlaceFragment:Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        Log.d(SunnyWeatherApplication.TAG, PlaceDao.isPlaceSaved().toString())
+        if(PlaceDao.isPlaceSaved()){
+            Log.d(SunnyWeatherApplication.TAG, "isSavedPlaced")
+            val place=PlaceDao.getSavedPlace()
+            val intent= Intent(this.activity,WeatherActivity::class.java)
+            intent.putExtra("lng",place.location.lng)
+            intent.putExtra("lat",place.location.lat)
+            intent.putExtra("placeName",place.name)
+            startActivity(intent)
+            activity?.finish()
+            return
+        }
+
         val layoutManager=LinearLayoutManager(activity)
         val recyclerView:RecyclerView=requireView().findViewById<RecyclerView>(R.id.recycleView)
         recyclerView.layoutManager =layoutManager
@@ -61,6 +78,7 @@ class PlaceFragment:Fragment() {
                 bgImageView.visibility=View.GONE
                 viewModel.placeList.clear()
                 viewModel.placeList.addAll(places)
+//                viewModel.placeList.addAll(places)
                 adapter.notifyDataSetChanged()
             }else{
                 Toast.makeText(activity,"未查到该地点", Toast.LENGTH_SHORT).show()
